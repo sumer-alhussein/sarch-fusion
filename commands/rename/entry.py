@@ -425,22 +425,24 @@ def command_execute(args: adsk.core.CommandEventArgs):
 
     filtered_occurrences = []
     for _occ in _selected_occurrences:
-        if re.match(SAFE_COMPONENT_NAME_PATTERN, _occ.component.name) and not _force_mode:
-            futil.log(
-                f'component name is match and not force mode: {_occ.component.name}')
-            futil.log(
-                f'{re.match(SAFE_COMPONENT_NAME_PATTERN, _occ.component.name)}')
-            continue
-        elif re.search(SAFE_COMPONENT_NAME_PATTERN, _occ.component.name) is None or _force_mode:
-            futil.log(
-                f'component name is not match or force mode: {_occ.component.name}')
-            futil.log(
-                f'{re.match(SAFE_COMPONENT_NAME_PATTERN, _occ.component.name)}')
-            _occ.component.name = '_temp_'
-            filtered_occurrences.append(_occ)
+        if isinstance(_occ, adsk.fusion.Occurrence):
+            if re.match(SAFE_COMPONENT_NAME_PATTERN, _occ.component.name) and not _force_mode:
+                futil.log(
+                    f'component name is match and not force mode: {_occ.component.name}')
+                futil.log(
+                    f'{re.match(SAFE_COMPONENT_NAME_PATTERN, _occ.component.name)}')
+                continue
+            elif re.search(SAFE_COMPONENT_NAME_PATTERN, _occ.component.name) is None or _force_mode:
+                futil.log(
+                    f'component name is not match or force mode: {_occ.component.name}')
+                futil.log(
+                    f'{re.match(SAFE_COMPONENT_NAME_PATTERN, _occ.component.name)}')
+                _occ.component.name = '_temp_'
+                filtered_occurrences.append(_occ)
+            else:
+                continue
         else:
-            continue
-
+            pass
     for _occ in filtered_occurrences:
         _all_components_names = [comp.name for comp in _all_components]
 
@@ -555,9 +557,14 @@ def command_destroy(args: adsk.core.CommandEventArgs):
 
 def get_project_name():
     app = adsk.core.Application.get()
-    ui = app.userInterface
     design = app.activeProduct
-    dataFile = design.parentDocument.dataFile
+    dataFile = None
+    if design:
+        try:
+            dataFile = design.parentDocument.dataFile
+        except:
+            futil.log(f'ERROR: LOCAL CACH, CAN\'T GET FILE NAME')
+            pass
     project_name = 'TEMP'
     if dataFile is not None:
         project_name = dataFile.name
