@@ -1,0 +1,13 @@
+{
+	"autodeskProduct":	"Fusion",
+	"type":	"addin",
+	"id":	"b810a84f-6204-411e-8b5c-5fc1435cdd63",
+	"author":	"sarch.io",
+	"description":	{
+		"":	"Powerfull rename tool for rename components"
+	},
+	"version":	"0.0.1",
+	"runOnStartup":	true,
+	"supportedOS":	"windows|mac",
+	"editEnabled":	true
+}

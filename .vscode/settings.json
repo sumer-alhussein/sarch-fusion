@@ -1,0 +1,58 @@
+{
+  "python.autoComplete.extraPaths": [
+    "C:/Users/somar/AppData/Roaming/Autodesk/Autodesk Fusion 360/API/Python/defs"
+  ],
+  "python.analysis.extraPaths": [
+    "C:/Users/somar/AppData/Roaming/Autodesk/Autodesk Fusion 360/API/Python/defs"
+  ],
+  "python.defaultInterpreterPath": "C:/Users/somar/AppData/Local/Autodesk/webdeploy/production/35a60349b112668a59dd7bbcc68b2622875103f4/Python/python.exe",
+  "editor.defaultFormatter": "ms-python.autopep8",
+	"editor.formatOnSave": true,
+	"better-comments.tags": [
+		{
+			"tag": "!",
+			"color": "#FF2D00",
+			"strikethrough": false,
+			"underline": false,
+			"backgroundColor": "transparent",
+			"bold": false,
+			"italic": false
+		},
+		{
+			"tag": "?",
+			"color": "#3498DB",
+			"strikethrough": false,
+			"underline": false,
+			"backgroundColor": "transparent",
+			"bold": false,
+			"italic": false
+		},
+		{
+			"tag": "//",
+			"color": "#474747",
+			"strikethrough": true,
+			"underline": false,
+			"backgroundColor": "transparent",
+			"bold": false,
+			"italic": false
+		},
+		{
+			"tag": "todo",
+			"color": "#FF8C00",
+			"strikethrough": false,
+			"underline": false,
+			"backgroundColor": "transparent",
+			"bold": false,
+			"italic": false
+		},
+		{
+			"tag": "*",
+			"color": "#98C379",
+			"strikethrough": false,
+			"underline": false,
+			"backgroundColor": "transparent",
+			"bold": false,
+			"italic": false
+		}
+	]
+}
