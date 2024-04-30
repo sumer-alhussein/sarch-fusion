@@ -413,7 +413,6 @@ def command_execute(args: adsk.core.CommandEventArgs):
     _selected_intities = ui.activeSelections
 
     _design: adsk.fusion.Design = adsk.fusion.Design.cast(app.activeProduct)
-    _all_doc_occurrences: adsk.fusion.OccurrenceList = _design.rootComponent.allOccurrences
     _selected_occurrences: List[adsk.fusion.Occurrence] = [
         adsk.fusion.Occurrence.cast(_occ.entity) for _occ in _selected_intities]
 
@@ -443,8 +442,8 @@ def command_execute(args: adsk.core.CommandEventArgs):
                 continue
         else:
             pass
+    _all_components_names = [_comp.name for _comp in _all_components]
     for _occ in filtered_occurrences:
-        _all_components_names = [comp.name for comp in _all_components]
 
         # Get the component from the occurrence
         _component = _occ.component
