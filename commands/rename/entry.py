@@ -442,8 +442,8 @@ def command_execute(args: adsk.core.CommandEventArgs):
                 continue
         else:
             pass
-    _all_components_names = [_comp.name for _comp in _all_components]
     for _occ in filtered_occurrences:
+        _all_components_names = [_comp.name for _comp in _all_components]
 
         # Get the component from the occurrence
         _component = _occ.component
