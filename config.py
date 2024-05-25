@@ -26,6 +26,9 @@ design_workspace = 'FusionSolidEnvironment'
 tools_tab_id = "ToolsTab"
 my_tab_name = "sarch"  # Only used if creating a custom Tab
 
+hide_group_id = f'{ADDIN_NAME}_hide_group'
+hide_group_name = 'Hide'
+
 my_panel_id = f'{ADDIN_NAME}_panel'
 my_panel_name = ADDIN_NAME
 my_panel_after = ''
