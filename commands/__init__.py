@@ -5,12 +5,14 @@
 # You need to use aliases (import "entry" as "my_module") assuming you have the default module named "entry".
 from .rename import entry as rename
 from .hide.hide_similar_appearance import entry as hide_similar_appearance
+from .update_sarch import entry as update_sarch
 
 # TODO add your imported modules to this list.
 # Fusion will automatically call the start() and stop() functions.
 commands = [
     rename,
     hide_similar_appearance,
+    update_sarch
     # paletteShow,
     # paletteSend
 ]
