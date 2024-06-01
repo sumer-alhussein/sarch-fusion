@@ -128,7 +128,7 @@ def command_execute(args: adsk.core.CommandEventArgs):
     adsk.fusion.BRepFace.cast(_face.entity) for _face in _selected_intities if _face.entity.objectType == adsk.fusion.BRepFace.classType()
     ]
 
-    _selected_appearances = [face.appearance.name.lower() for face in _selected_faces if face.appearance]
+    _selected_appearances = list(set([face.appearance.name.lower() for face in _selected_faces if face.appearance]))
 
     # _all_bodies = root_component.bRepBodies
     _root_component = design.rootComponent
