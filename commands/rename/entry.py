@@ -5,6 +5,9 @@ from sys import prefix
 import adsk.core
 import adsk.fusion
 import os
+
+from ...constants import COLLECTIONS
+from ...helpers import get_user_collections as user_collections
 from ...lib import fusion360utils as futil
 from ... import config
 
@@ -24,186 +27,27 @@ SAFE_PROJECT_NAME_PATTERN = r'^[A-Za-z]{2}\d{1,2}_\d{3,5}$'
 # This is used to create a drop-down list in the command dialog.
 # Categories and Sub-Categories type
 
+categories = user_collections.get_user_collections()
+# class Category:
+#     def __init__(self, name, id=None, description=None, subcategories=None):
+#         self.id = id
+#         self.name = name
+#         self.description = description
+#         self.subcategories = subcategories or []
 
-class Category:
-    def __init__(self, name, id=None, description=None, subcategories=None):
-        self.id = id
-        self.name = name
-        self.description = description
-        self.subcategories = subcategories or []
-
-    def add_subcatogries(self, name, id):
-        self.subcategories.append(
-            {'id': id, 'name': name})
+#     def add_subcatogries(self, name, id):
+#         self.subcategories.append(
+#             {'id': id, 'name': name})
 
 
-CATEGORIES = [
-    {
-        'id': 'WND',
-        'name': 'Windows',
-        'description': 'Windows',
-        'subcategories': [
-            {
-                'id': 'W1',
-                'name': 'Indoor/ outdoor window',
-            },
-            {
-                'id': 'W2',
-                'name': 'Outdoor/ outdoor window',
-            },
-            {
-                'id': 'W3',
-                'name': 'Indoor/ indoor window',
-            },
-            {
-                'id': 'RWN',
-                'name': 'Rowshan',
-            },
-            {
-                'id': 'MSH',
-                'name': 'Mashrabia',
-            },
-            {
-                'id': 'RGN',
-                'name': 'Wrought Iron',
-            },
-        ]
-    },
-    {
-        'id': 'DRS',
-        'name': 'Doors',
-        'description': 'Doors',
-        'subcategories': [
-            {
-              'id': 'D1',
-              'name': 'Indoor/ outdoor door',
-            },
-            {
-                'id': 'D2',
-                'name': 'Outdoor/ outdoor door',
-            },
-            {
-                'id': 'D3',
-                'name': 'Indoor/ indoor door',
-            },
-        ]
-    },
-    {
-        'id': 'CBN',
-        'name': 'Cabinets',
-        'description': 'Cabinets',
-        'subcategories': [
-            {
-                'id': 'C1',
-                'name': 'Indoor Cabinet',
-            },
-            {
-                'id': 'C2',
-                'name': 'Outdoor Cabinet',
-            },
-            {
-                'id': 'CE',
-                'name': 'Electrical Cabinet',
-            },
-        ]
-    },
-    {
-        'id': 'WDB',
-        'name': 'Wooden Beams and Lintels',
-        'description': 'Wooden Beams and Lintels',
-        'subcategories': [
-            {
-              'id': 'B1',
-              'name': 'Wooden Beam',
-            },
-            {
-                'id': 'B2',
-                'name': 'Wooden Plank',
-            },
-        ]
-    },
-    {
-        'id': 'DCR',
-        'name': 'Decorative Elements',
-        'description': 'Decorative Elements',
-        'subcategories': [
-            {
-              'id': 'PR',
-              'name': 'Decorative Plaster / Stucco Element',
-            },
-            {
-                'id': 'WD',
-                'name': 'Decorative Wood Element',
-            },
-        ]
-    }, {
-        'id': 'HDR',
-        'name': 'Handrails',
-        'description': 'Handrails',
-        'subcategories': [
-            {
-              'id': 'H1',
-              'name': 'Indoor Handrail',
-            },
-            {
-                'id': 'H2',
-                'name': 'Outdoor Handrail',
-            },
-        ]
-    }, {
-        'id': 'STR',
-        'name': 'Stairs',
-        'description': 'Stairs',
-        'subcategories': [
-            {
-              'id': 'S1',
-              'name': 'Indoor Stair',
-            },
-            {
-                'id': 'S2',
-                'name': 'Outdoor Stair',
-            },
-        ]
-    }, {
-        'id': 'CLM',
-        'name': 'Columns',
-        'description': 'Columns',
-        'subcategories': [
-            {
-              'id': 'WD',
-              'name': 'Wooden Column',
-            },
-            {
-                'id': 'DR',
-                'name': 'Decorative Column',
-            },
-        ]
-    }, {
-        'id': 'ARY',
-        'name': 'Arayes',
-        'description': 'Arayes',
-        'subcategories': [
-            {
-              'id': 'A1',
-              'name': 'Indoor Arayes',
-            },
-            {
-                'id': 'A2',
-                'name': 'Outdoor Arayes',
-            },
-        ]
-    }
-
-]
-
-categories: list[Category] = []
-for category_data in CATEGORIES:
-    category = Category(
-        name=category_data['name'], id=category_data['id'], description=category_data['description'])
-    for subcategory_data in category_data['subcategories']:
-        category.add_subcatogries(
-            name=subcategory_data['name'], id=subcategory_data['id'])
-    categories.append(category)
+# categories: list[Category] = []
+# for category_data in COLLECTIONS:
+#     category = Category(
+#         name=category_data['name'], id=category_data['id'], description=category_data['description'])
+#     for subcategory_data in category_data['subcategories']:
+#         category.add_subcatogries(
+#             name=subcategory_data['name'], id=subcategory_data['id'])
+#     categories.append(category)
 
 
 # TODO *** Specify the command identity information. ***
@@ -500,7 +344,7 @@ def command_input_changed(args: adsk.core.InputChangedEventArgs):
         if category_input.selectedItem is not None:
             subcategories_input_listItems.clear()
             selected_category = next(
-                (category for category in CATEGORIES if category['name'] == category_input.selectedItem.name), None)
+                (category for category in COLLECTIONS if category['name'] == category_input.selectedItem.name), None)
             if selected_category is None:
                 return
             for subcategory in selected_category['subcategories']:

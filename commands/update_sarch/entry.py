@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import traceback
 from typing import List
 import adsk.cam
@@ -12,6 +13,7 @@ from ...helpers import *
 from ...lib import fusion360utils as futil
 from ... import config
 
+import asyncio
 
 import http.client
 import json
@@ -111,9 +113,14 @@ def stop():
 
 # Function that is called when a user clicks the corresponding button in the UI.
 # This defines the contents of the command dialog and connects to the command related events.
+checking_update_status = 'Null'
+
+
 def command_created(args: adsk.core.CommandCreatedEventArgs):
-    check_for_updates()
-    
+
+    _check_for_updates_status = check_for_updates()
+    _update_status = 'NO_INSTALLATION_RUNNING'
+
     # futil.log(f'Current Version: {current_version}')
     # h = http.client.HTTPSConnection('api.github.com')
     # headers = {'User-Agent': 'Fusion360'}
@@ -125,7 +132,6 @@ def command_created(args: adsk.core.CommandCreatedEventArgs):
     # resJson = json.loads(resString)
 
     # futil.log(f'Command Created Event {resJson}')
-
 
     # General logging for debug.
     futil.log(f'{CMD_NAME} Command Created Event')
@@ -139,16 +145,23 @@ def command_created(args: adsk.core.CommandCreatedEventArgs):
     ######################### ? Start My Inputs #########################
 
     # ? Use Project Name Input
-    use_project_name_input = inputs.addBoolValueInput(
-        'use_project_name_input', 'Use file name', True, '', True)
-    use_project_name_input.tooltip = 'Use the project name as a prefix for the component name.'
+
+    check_for_updates_input = inputs.addTextBoxCommandInput(
+        'check_for_updates_input', 'Checking for Updates', (_check_for_updates_status), 2, True)
+    check_for_updates_input.isFullWidth = True
+
+    update_input = inputs.addBoolValueInput(
+        'update_input', 'Update now', False, ICON_FOLDER, False)
+
+    update_status_input = inputs.addTextBoxCommandInput(
+        'update_status_input', 'Installing updates...', (f'{_update_status}'), 2, True)
+    update_status_input.isVisible = False
 
     # # ? Prefix Text Input
     # prefix_input = inputs.addStringValueInput(
     #     'prefix_input', 'Project name with prefix', f"{_project_name.upper()}")
     # prefix_input.tooltip = 'Prefix to component name eg. UC1_999 will create UC1_999_CATEGORY_SUBCATEGORY_1'
     # prefix_input.isEnabled = False
-
 
     ######################### ? End My Inputs ###########################
 
@@ -180,7 +193,6 @@ def command_execute(args: adsk.core.CommandEventArgs):
             'prefix_input'))
 
 
-
 def command_preview(args: adsk.core.CommandEventArgs):
     # General logging for debug.
     futil.log(f'{CMD_NAME} Command Preview Event')
@@ -193,46 +205,55 @@ def command_input_changed(args: adsk.core.InputChangedEventArgs):
     changed_input = args.input
     inputs = args.inputs
 
-    # use_project_name_input: adsk.core.BoolValueCommandInput = adsk.core.BoolValueCommandInput.cast(inputs.itemById(
-    #     'use_project_name_input'))
-    # prefix_input: adsk.core.StringValueCommandInput = adsk.core.StringValueCommandInput.cast(
-    #     inputs.itemById(
-    #         'prefix_input'))
-    # category_input: adsk.core.DropDownCommandInput = adsk.core.DropDownCommandInput.cast(inputs.itemById(
-    #     'category_input'))
-    # subcategories_input: adsk.core.ButtonRowCommandInput = adsk.core.ButtonRowCommandInput.cast(
-    #     inputs.itemById(
-    #         'subcategories_input'))
-    # subcategories_input_listItems = subcategories_input.listItems
+    update_status_input: adsk.core.TextBoxCommandInput = adsk.core.TextBoxCommandInput.cast(
+        inputs.itemById('update_status_input'))
 
-    # if changed_input.id == use_project_name_input.id:
-    #     prefix_input.isEnabled = not use_project_name_input.value
-    #     futil.log(f'prefix_input: {prefix_input.value}')
-    #     if use_project_name_input:
-    #         prefix_input.value = _project_name.upper()
+    update_input: adsk.core.BoolValueCommandInput = adsk.core.BoolValueCommandInput.cast(
+        inputs.itemById('update_input'))
 
-    # if changed_input.id == category_input.id:
-    #     if category_input.selectedItem is not None:
-    #         subcategories_input_listItems.clear()
-    #         selected_category = next(
-    #             (category for category in CATEGORIES if category['name'] == category_input.selectedItem.name), None)
-    #         if selected_category is None:
-    #             return
-    #         for subcategory in selected_category['subcategories']:
-    #             _icon = os.path.join(
-    #                 ICON_FOLDER, f'{selected_category["id"]}_{subcategory["id"]}')
+    if changed_input.id == update_input.id:
+        update_status_input.isVisible = True
 
-    #             subcategories_input_listItems.add(
-    #                 subcategory['name'], False, _icon, -1)
+        # use_project_name_input: adsk.core.BoolValueCommandInput = adsk.core.BoolValueCommandInput.cast(inputs.itemById(
+        #     'use_project_name_input'))
+        # prefix_input: adsk.core.StringValueCommandInput = adsk.core.StringValueCommandInput.cast(
+        #     inputs.itemById(
+        #         'prefix_input'))
+        # category_input: adsk.core.DropDownCommandInput = adsk.core.DropDownCommandInput.cast(inputs.itemById(
+        #     'category_input'))
+        # subcategories_input: adsk.core.ButtonRowCommandInput = adsk.core.ButtonRowCommandInput.cast(
+        #     inputs.itemById(
+        #         'subcategories_input'))
+        # subcategories_input_listItems = subcategories_input.listItems
 
-    #         subcategories_input.isVisible = True
+        # if changed_input.id == use_project_name_input.id:
+        #     prefix_input.isEnabled = not use_project_name_input.value
+        #     futil.log(f'prefix_input: {prefix_input.value}')
+        #     if use_project_name_input:
+        #         prefix_input.value = _project_name.upper()
 
-    #     else:
-    #         subcategories_input_listItems.clear()
-    #         subcategories_input.isVisible = False
-    #         pass
+        # if changed_input.id == category_input.id:
+        #     if category_input.selectedItem is not None:
+        #         subcategories_input_listItems.clear()
+        #         selected_category = next(
+        #             (category for category in CATEGORIES if category['name'] == category_input.selectedItem.name), None)
+        #         if selected_category is None:
+        #             return
+        #         for subcategory in selected_category['subcategories']:
+        #             _icon = os.path.join(
+        #                 ICON_FOLDER, f'{selected_category["id"]}_{subcategory["id"]}')
 
-    # General logging for debug.
+        #             subcategories_input_listItems.add(
+        #                 subcategory['name'], False, _icon, -1)
+
+        #         subcategories_input.isVisible = True
+
+        #     else:
+        #         subcategories_input_listItems.clear()
+        #         subcategories_input.isVisible = False
+        #         pass
+
+        # General logging for debug.
     futil.log(
         f'{CMD_NAME} Input Changed Event fired from a change to {changed_input.id}')
 
@@ -267,5 +288,3 @@ def command_destroy(args: adsk.core.CommandEventArgs):
 
     global local_handlers
     local_handlers = []
-
-
